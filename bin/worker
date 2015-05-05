@@ -9,14 +9,10 @@ Que.logger = Logger.new($stdout)
 Que.mode = :async
 Que.worker_count = WORKER_COUNT
 
-jobs_worked = 0
 Que.log_formatter = lambda do |data|
   case data[:event].to_sym
   when :job_worked
-    jobs_worked += 1
-    if jobs_worked % BATCH_SIZE == 0
-      puts "worked #{BATCH_SIZE} jobs (queue count = #{DB[:que_jobs].count})"
-    end
+    Metrics.measure "work-time", data[:elapsed]
   end
 
   nil
@@ -35,8 +31,17 @@ trap('TERM') do
   stop = true
 end
 
+def oldest_xact
+  DB[:pg_stat_activity].
+    all.
+    select { |a| a[:xact_start] }.
+    map { |a| Time.now - a[:xact_start] }.
+    max
+end
+
 loop do
-  puts "queue count = #{DB[:que_jobs].count}"
+  Metrics.sample "queue-count", DB[:que_jobs].count, "jobs"
+  Metrics.sample "oldest-xact", oldest_xact, "s"
   sleep 0.5
   break if stop
 end

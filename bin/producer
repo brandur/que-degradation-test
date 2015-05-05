@@ -8,7 +8,9 @@ Que.mode = :off
 
 loop do
   BATCH_SIZE.times do
-    DummyJob.enqueue
+    Metrics.measure "enqueue-time" do
+      DummyJob.enqueue
+    end
   end
   puts "queued #{BATCH_SIZE} jobs"
   sleep 2
