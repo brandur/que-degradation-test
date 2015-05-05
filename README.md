@@ -16,3 +16,13 @@ $ DATABASE_URL=postgres://localhost/que-degradation-test bundle exec bin/worker
 # start a long runner
 $ DATABASE_URL=postgres://localhost/que-degradation-test bundle exec bin/long-runner
 ```
+
+```
+$ heroku create
+$ heroku addons:add heroku-postgresql:standard-0
+$ heroku run 'bundle exec sequel -m migrations/ $DATABASE_URL'
+
+$ heroku ps:scale producer=1 worker=1
+
+$ heroku ps:scale longrunner=1
+```
