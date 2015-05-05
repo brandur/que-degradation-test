@@ -22,15 +22,17 @@ class Metrics
   end
 
   def self.measure(name, value = nil)
+    ret = nil
     v = if block_given?
       t = Time.now
-      yield
+      ret = yield
       Time.now - t
     else
       raise ArgumentError, "need value without block" unless value
       value
     end
     print "measure##{PREFIX}.#{name}=#{v}s\n"
+    ret
   end
 
   def self.sample(name, value, units)
