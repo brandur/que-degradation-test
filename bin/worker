@@ -9,13 +9,21 @@ Que.logger = Logger.new($stdout)
 Que.mode = :async
 Que.worker_count = WORKER_COUNT
 
+Que.error_handler = lambda do |e, job|
+  puts e.message
+  e.backtrace.each do |line|
+    puts e.line
+  end
+end
+
 Que.log_formatter = lambda do |data|
   case data[:event].to_sym
   when :job_worked
     Metrics.measure "work-time", data[:elapsed]
+    nil
+  else
+    JSON.dump(data)
   end
-
-  nil
 end
 
 # Exit immediately, killing any in-flight jobs
