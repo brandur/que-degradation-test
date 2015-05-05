@@ -1,0 +1,39 @@
+#!/usr/bin/env ruby
+
+require_relative "../common"
+
+worker_count = 8
+
+DB = Sequel.connect(ENV['DATABASE_URL'] || abort("no DATABASE_URL"),
+  max_connections: worker_count)
+Que.connection = DB
+Que.log_formatter = lambda do |data|
+  case data[:event].to_sym
+  when :job_worked
+    puts "worked job #{data[:job][:job_id]} (queue count = #{DB[:que_jobs].count}"
+  end
+
+  nil
+end
+Que.logger = Logger.new($stdout)
+Que.mode = :async
+Que.worker_count = worker_count
+
+# Exit immediately, killing any in-flight jobs
+trap('INT') do
+  puts "received SIGINT"
+  exit
+end
+
+stop = false
+# Exit gracefully, finishing any in-flight jobs.
+trap('TERM') do
+  puts "received SIGTERM"
+  stop = true
+end
+
+loop do
+  puts "queue count = #{DB[:que_jobs].count}"
+  sleep 0.5
+  break if stop
+end

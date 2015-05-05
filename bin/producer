@@ -1,0 +1,15 @@
+#!/usr/bin/env ruby
+
+require_relative "../common"
+
+DB = Sequel.connect(ENV['DATABASE_URL'] || abort("no DATABASE_URL"))
+Que.connection = DB
+Que.mode = :off
+
+loop do
+  100.times do
+    DummyJob.enqueue
+  end
+  puts "queued 100 jobs"
+  sleep 2
+end

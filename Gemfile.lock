@@ -1,0 +1,14 @@
+GEM
+  remote: https://rubygems.org/
+  specs:
+    pg (0.18.1)
+    que (0.10.0)
+    sequel (4.17.0)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  pg
+  que
+  sequel
