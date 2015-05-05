@@ -1,0 +1,12 @@
+#!/usr/bin/env ruby
+
+require "time"
+require_relative "../common"
+
+DB = Sequel.connect(DATABASE_URL)
+
+DB.transaction do
+  puts "opening a long-lived transaction ..."
+  DB[:dummy_tuples].insert(name: "run @ #{Time.now.iso8601}")
+  sleep(10000)
+end

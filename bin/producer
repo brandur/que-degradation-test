@@ -2,14 +2,14 @@
 
 require_relative "../common"
 
-DB = Sequel.connect(ENV['DATABASE_URL'] || abort("no DATABASE_URL"))
+DB = Sequel.connect(DATABASE_URL)
 Que.connection = DB
 Que.mode = :off
 
 loop do
-  100.times do
+  BATCH_SIZE.times do
     DummyJob.enqueue
   end
-  puts "queued 100 jobs"
+  puts "queued #{BATCH_SIZE} jobs"
   sleep 2
 end

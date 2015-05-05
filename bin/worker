@@ -2,22 +2,25 @@
 
 require_relative "../common"
 
-worker_count = 8
-
-DB = Sequel.connect(ENV['DATABASE_URL'] || abort("no DATABASE_URL"),
-  max_connections: worker_count)
+# + 1 extra for the main thread
+DB = Sequel.connect(DATABASE_URL, max_connections: WORKER_COUNT + 1)
 Que.connection = DB
+Que.logger = Logger.new($stdout)
+Que.mode = :async
+Que.worker_count = WORKER_COUNT
+
+jobs_worked = 0
 Que.log_formatter = lambda do |data|
   case data[:event].to_sym
   when :job_worked
-    puts "worked job #{data[:job][:job_id]} (queue count = #{DB[:que_jobs].count}"
+    jobs_worked += 1
+    if jobs_worked % BATCH_SIZE == 0
+      puts "worked #{BATCH_SIZE} jobs (queue count = #{DB[:que_jobs].count})"
+    end
   end
 
   nil
 end
-Que.logger = Logger.new($stdout)
-Que.mode = :async
-Que.worker_count = worker_count
 
 # Exit immediately, killing any in-flight jobs
 trap('INT') do

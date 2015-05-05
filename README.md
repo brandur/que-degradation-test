@@ -12,4 +12,7 @@ $ DATABASE_URL=postgres://localhost/que-degradation-test bundle exec bin/produce
 
 # start a worker
 $ DATABASE_URL=postgres://localhost/que-degradation-test bundle exec bin/worker
+
+# start a long runner
+$ DATABASE_URL=postgres://localhost/que-degradation-test bundle exec bin/long-runner
 ```
