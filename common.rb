@@ -13,25 +13,43 @@ class DummyJob < Que::Job
   end
 end
 
+# IMPORTANT! `puts` is not thread safe! Use `print`.
 class Metrics
   PREFIX = "que-degradation-test"
 
   def self.count(name)
-    puts "count##{PREFIX}.#{name}"
+    print "count##{PREFIX}.#{name}\n"
   end
 
   def self.measure(name, value = nil)
-    t = Time.now
     v = if block_given?
+      t = Time.now
       yield
+      Time.now - t
     else
       raise ArgumentError, "need value without block" unless value
       value
     end
-    puts "measure##{PREFIX}.#{name}=#{v}s"
+    print "measure##{PREFIX}.#{name}=#{v}s\n"
   end
 
   def self.sample(name, value, units)
-    puts "sample##{PREFIX}.#{name}=#{value}#{units}"
+    print "sample##{PREFIX}.#{name}=#{value}#{units}\n"
+  end
+end
+
+module Que
+  class << self
+    alias_method :que_execute, :execute
+
+    def execute(*args)
+      if args.first && args.first == :lock_job
+        Metrics.measure "lock-time" do
+          que_execute(*args)
+        end
+      else
+        que_execute(*args)
+      end
+    end
   end
 end
