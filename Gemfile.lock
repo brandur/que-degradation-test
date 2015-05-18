@@ -1,7 +1,6 @@
 GIT
   remote: https://github.com/brandur/que
-  revision: 67c2a7f3ceef80aec573f615d6e03dd5846f258c
-  branch: transaction-tolerant
+  revision: f95aec38a48a86d1b4c82297bc5ed9c88bb600d6
   specs:
     que (0.10.0)
 
