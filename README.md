@@ -13,18 +13,21 @@ The basic steps to reproduce a degraded situation are as follows:
 ## Local Install
 
 ```
+$ export DATABASE_URL=postgres://localhost:5433/que-degradation-test
+$ export DATABASE=que-degradation-test
+
 $ bundle install
-$ createdb que-degradation-test
-$ bundle exec sequel -m migrations/ postgres://localhost/que-degradation-test
+$ createdb $DATABASE
+$ bundle exec sequel -m migrations/ $DATABASE_URL
 
 # start a producer
-$ DATABASE_URL=postgres://localhost/que-degradation-test bundle exec bin/producer
+$ bundle exec bin/producer
 
 # start a worker
-$ DATABASE_URL=postgres://localhost/que-degradation-test bundle exec bin/worker
+$ bundle exec bin/worker | egrep '(oldest|queue-count|dead-tuples-count)'
 
 # start a long runner
-$ DATABASE_URL=postgres://localhost/que-degradation-test bundle exec bin/long-runner
+$ bundle exec bin/long-runner
 ```
 
 ## Heroku Install
